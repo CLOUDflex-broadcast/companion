@@ -9,3 +9,11 @@ export interface PresetDragItem {
 	variableValues: VariableValues | null
 	mode: PresetPlacementMode
 }
+
+/** The dnd-kit type of a custom preset being dragged */
+export const CUSTOM_PRESET_DRAG_TYPE = 'custom-preset'
+
+export interface CustomPresetDragItem {
+	presetId: string
+	mode: PresetPlacementMode
+}

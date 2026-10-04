@@ -35,7 +35,7 @@ export const LayeredButtonEditor = observer(function LayeredButtonEditor({
 	config: LayeredButtonModel
 	controlId: string
 	runtimeProps: Record<string, any> | false
-	location: ControlLocation
+	location: ControlLocation | undefined
 }) {
 	const configRef = useRef<SomeButtonModel>(config || undefined)
 	configRef.current = config || undefined // update the ref every render
@@ -53,7 +53,7 @@ export const LayeredButtonEditor = observer(function LayeredButtonEditor({
 		styleStore.updateOverridesData(config.feedbacks || [])
 	}, [styleStore, config.feedbacks])
 
-	const localVariablesStore = useLocalVariablesStore(controlId, config.localVariables, location.pageNumber)
+	const localVariablesStore = useLocalVariablesStore(controlId, config.localVariables, location?.pageNumber ?? null)
 
 	return (
 		<div className="grow flex flex-col min-h-0">
@@ -140,7 +140,7 @@ export const LayeredButtonEditor = observer(function LayeredButtonEditor({
 
 interface LayeredButtonEditorStyleProps {
 	controlId: string
-	location: ControlLocation
+	location: ControlLocation | undefined
 	styleStore: LayeredStyleStore
 	// previewImage: string | null
 	localVariablesStore: LocalVariablesStore

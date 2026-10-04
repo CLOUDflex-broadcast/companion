@@ -603,9 +603,9 @@ export class GraphicsController extends EventEmitter<GraphicsControllerEvents> {
 			return
 		}
 
-		// Special case for presets as they don't have a location, but do have bitmaps
+		// Special case for presets (and the templates of custom presets) as they don't have a location, but do have bitmaps
 		const parsedControlId = ParseControlId(controlId)
-		if (parsedControlId?.type === 'preset') {
+		if (parsedControlId?.type === 'preset' || parsedControlId?.type === 'custom-preset') {
 			this.#drawAndCachePreset(controlId)
 		}
 	}

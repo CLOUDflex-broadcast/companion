@@ -10,7 +10,7 @@ import { parseGridButtonDroppableId } from './GridButtonDroppableId.js'
 import { planGridDrop } from './GridDragDrop.js'
 import { previewPlacements } from './GridGeometry.js'
 import type { GridToolActions } from './GridTools/index.js'
-import type { PresetDragItem } from './Presets/PresetDragItem.js'
+import { CUSTOM_PRESET_DRAG_TYPE, type CustomPresetDragItem, type PresetDragItem } from './Presets/PresetDragItem.js'
 
 export interface UseGridDropMonitorOptions {
 	store: ButtonGridStore
@@ -51,6 +51,7 @@ export function useGridDropMonitor({ store, gridSize, isOccupied, actions }: Use
 	)
 
 	const importPresetMutation = useMutationExt(trpc.controls.importPreset.mutationOptions())
+	const placeCustomPresetMutation = useMutationExt(trpc.controls.customPresets.place.mutationOptions())
 
 	useDragDropMonitor({
 		onDragOver(event) {
@@ -84,6 +85,23 @@ export function useGridDropMonitor({ store, gridSize, isOccupied, actions }: Use
 					})
 					.catch(() => {
 						console.error('Preset import failed')
+					})
+				return
+			}
+
+			if (source.type === CUSTOM_PRESET_DRAG_TYPE) {
+				const location = parseGridButtonDroppableId(target.id)
+				if (!location) return
+
+				const dropData = source.data as CustomPresetDragItem
+				placeCustomPresetMutation
+					.mutateAsync({
+						presetId: dropData.presetId,
+						location,
+						mode: dropData.mode,
+					})
+					.catch(() => {
+						console.error('Custom preset placement failed')
 					})
 				return
 			}

@@ -169,7 +169,7 @@ export const PresetsSectionsList = observer(function PresetsCategoryList({
 	)
 })
 
-function PresetPlacementModeToggle({ supportsReferences }: { supportsReferences: boolean }): React.JSX.Element {
+export function PresetPlacementModeToggle({ supportsReferences }: { supportsReferences: boolean }): React.JSX.Element {
 	const [mode, setMode] = usePresetPlacementMode()
 
 	// When the module doesn't support references, presets are always placed as a copy regardless of the

@@ -25,7 +25,7 @@ export interface ButtonEditorExtraTabs {
 
 interface ButtonEditorTabsProps {
 	controlId: string
-	location: ControlLocation
+	location: ControlLocation | undefined
 	steps: NormalButtonSteps
 	disabledSetStep: boolean
 	runtimeProps: Record<string, any>

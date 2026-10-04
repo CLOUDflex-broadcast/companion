@@ -1,4 +1,4 @@
-import { faArrowRight, faLifeRing } from '@fortawesome/free-solid-svg-icons'
+import { faArrowRight, faLifeRing, faStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { observer } from 'mobx-react-lite'
 import { createContext, memo, useCallback, useContext } from 'react'
@@ -78,10 +78,15 @@ const PresetGroupHeader = memo(function PresetGroupHeader({
 interface PresetsConnectionListProps {
 	presetsDefinitionsStore: PresetDefinitionsStore
 	setConnectionId: (connectionId: string) => void
+	/** The number of custom presets, or null while still loading */
+	customPresetCount: number | null
+	openCustomPresets: () => void
 }
 export const PresetsConnectionList = observer(function PresetsConnectionList({
 	presetsDefinitionsStore,
 	setConnectionId,
+	customPresetCount,
+	openCustomPresets,
 }: PresetsConnectionListProps) {
 	const filterConnection = useCallback(
 		(connectionId: string, _connectionInfo: ClientConnectionConfig) => {
@@ -104,6 +109,42 @@ export const PresetsConnectionList = observer(function PresetsConnectionList({
 					Ready made buttons with text, actions and feedback which you can drop onto a button to help you get started
 					quickly.
 				</p>
+
+				<div className="collapsible-tree mb-2">
+					<div
+						className="collapsible-tree-leaf-row"
+						role="button"
+						tabIndex={0}
+						onClick={openCustomPresets}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								e.preventDefault()
+								openCustomPresets()
+							}
+						}}
+					>
+						<div className="collapsible-tree-leaf-content">
+							<div className="collapsible-tree-leaf-text">
+								<div className="flex justify-between items-center w-full">
+									<div>
+										<span className="collapsible-tree-connection-label">
+											<FontAwesomeIcon icon={faStar} className="me-1" />
+											Custom
+										</span>
+										<br />
+										<small className="opacity-70">Your own presets, built like any other button</small>
+									</div>
+									{customPresetCount !== null && (
+										<small className="ms-4 opacity-70">
+											{customPresetCount} {customPresetCount === 1 ? 'preset' : 'presets'}
+										</small>
+									)}
+								</div>
+							</div>
+							<FontAwesomeIcon icon={faArrowRight} className="collapsible-tree-leaf-arrow-icon" />
+						</div>
+					</div>
+				</div>
 
 				{!hasAnyConnections ? (
 					<div style={{ border: '1px solid #e9e9e9', borderRadius: 5 }}>

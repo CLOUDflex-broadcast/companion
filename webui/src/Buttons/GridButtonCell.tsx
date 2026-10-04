@@ -17,6 +17,7 @@ import {
 import { GRID_BUTTON_DRAG_TYPE, type GridButtonDragItem } from './GridButtonDragItem.js'
 import { makeGridButtonDroppableId } from './GridButtonDroppableId.js'
 import { GridButtonPreview, type GridButtonModifiers } from './GridButtonPreview.js'
+import { CUSTOM_PRESET_DRAG_TYPE } from './Presets/PresetDragItem.js'
 
 export interface GridButtonCellProps {
 	location: ControlLocation
@@ -45,14 +46,14 @@ export const GridButtonCell = memo(function GridButtonCell({
 
 	const { ref: drop, isDropTarget } = useDroppable({
 		id: makeGridButtonDroppableId(pageNumber, column, row),
-		accept: ['preset', GRID_BUTTON_DRAG_TYPE],
+		accept: ['preset', CUSTOM_PRESET_DRAG_TYPE, GRID_BUTTON_DRAG_TYPE],
 	})
 
 	// A preset can go on any button, which is worth saying while one is in flight. Dragging a button
 	// around the grid can also land anywhere, so marking every cell says nothing - what matters there
 	// is the landing region, which lights up on its own.
 	const { source } = useDragOperation()
-	const canDrop = source?.type === 'preset'
+	const canDrop = source?.type === 'preset' || source?.type === CUSTOM_PRESET_DRAG_TYPE
 
 	const locationKey = formatLocation(location)
 

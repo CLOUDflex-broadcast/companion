@@ -3,6 +3,7 @@ import type { ActionSetsModel } from '@companion-app/shared/Model/ActionModel.js
 import type {
 	ButtonModelBase,
 	ButtonReferenceButtonModel,
+	CustomPresetReferenceButtonModel,
 	LayeredButtonModel,
 	PresetReferenceButtonModel,
 } from '@companion-app/shared/Model/ButtonModel.js'
@@ -182,6 +183,28 @@ export function fixupPresetReferenceControl(
 			moduleId: control.presetRef?.moduleId,
 			presetId: control.presetRef?.presetId,
 			variableValues: control.presetRef?.variableValues ?? null,
+		},
+	}
+
+	referencesUpdater.visitDrawElements(result.style.layers)
+
+	return result
+}
+
+export function fixupCustomPresetReferenceControl(
+	logger: Logger,
+	control: ExportControlv6,
+	referencesUpdater: VisitorReferencesUpdater,
+	instanceIdMap: InstanceAppliedRemappings
+): CustomPresetReferenceButtonModel {
+	const result: CustomPresetReferenceButtonModel = {
+		type: 'custom-preset-reference',
+		options: structuredClone(control.options),
+		style: structuredClone(control.style),
+		...fixupButtonControlBase(logger, control, referencesUpdater, instanceIdMap),
+		customPresetRef: {
+			presetId: String(control.customPresetRef?.presetId ?? ''),
+			variableValues: structuredClone(control.customPresetRef?.variableValues ?? {}),
 		},
 	}
 

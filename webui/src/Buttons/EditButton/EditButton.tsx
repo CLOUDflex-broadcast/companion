@@ -21,6 +21,7 @@ import { ControlClearButton } from './ControlClearButton.js'
 import { ControlHotPressButtons } from './ControlHotPressButtons.js'
 import { ConvertToNormalButton } from './ConvertToNormalButton.js'
 import { CreateButtonTypeButtons } from './CreateButtonTypeButtons.js'
+import { CustomPresetReferenceEditor } from './CustomPresetReferenceEditor.js'
 import { LayeredButtonEditor } from './LayeredButtonEditor/LayeredButtonEditor.js'
 import { PresetReferenceEditor } from './PresetReferenceEditor.js'
 
@@ -122,9 +123,11 @@ const EditButtonContent = observer(function EditButton({
 								config.type === 'pagenum' ||
 								config.type === 'pagedown' ||
 								config.type === 'preset-reference' ||
+								config.type === 'custom-preset-reference' ||
 								config.type === 'button-reference') && <ConvertToNormalButton location={location} />}
 							{(config.type === 'button-layered' ||
 								config.type === 'preset-reference' ||
+								config.type === 'custom-preset-reference' ||
 								config.type === 'button-reference') && (
 								<ControlHotPressButtons
 									location={location}
@@ -135,6 +138,7 @@ const EditButtonContent = observer(function EditButton({
 					</div>
 					{(config.type === 'button-layered' ||
 						config.type === 'preset-reference' ||
+						config.type === 'custom-preset-reference' ||
 						config.type === 'button-reference') && (
 						<MyErrorBoundary>
 							<ControlNotesEditor controlId={controlId} notes={config.options.notes} className="w-full mt-1" />
@@ -168,6 +172,12 @@ const EditButtonContent = observer(function EditButton({
 			{config.type === 'preset-reference' && (
 				<MyErrorBoundary>
 					<PresetReferenceEditor config={config} location={location} />
+				</MyErrorBoundary>
+			)}
+
+			{config.type === 'custom-preset-reference' && (
+				<MyErrorBoundary>
+					<CustomPresetReferenceEditor config={config} location={location} />
 				</MyErrorBoundary>
 			)}
 

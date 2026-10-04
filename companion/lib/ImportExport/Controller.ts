@@ -416,6 +416,7 @@ export class ImportExportController {
 					switch (controlObjLayered.type) {
 						case 'button-layered':
 						case 'preset-reference':
+						case 'custom-preset-reference':
 							drawType = 'button'
 							rawElements = controlObjLayered.style.layers
 							break

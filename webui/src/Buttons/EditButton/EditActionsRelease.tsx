@@ -16,7 +16,7 @@ import {
 
 interface EditActionsReleaseProps {
 	controlId: string
-	location: ControlLocation
+	location: ControlLocation | undefined
 	action_sets: ActionSetsModel
 	stepOptions: ActionStepOptions
 	stepId: string

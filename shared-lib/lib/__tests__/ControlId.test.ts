@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import {
 	CreateBankControlId,
+	CreateCustomPresetControlId,
 	CreateExpressionVariableControlId,
 	CreatePageControlId,
 	CreatePresetControlId,
@@ -167,6 +168,23 @@ describe('CreatePageControlId', () => {
 describe('CreatePresetControlId', () => {
 	test('joins connectionId, presetId, variablesHash with colons', () => {
 		expect(CreatePresetControlId('conn1', 'btn_01', 'abc')).toBe('preset:conn1:btn_01:abc')
+	})
+})
+
+describe('CreateCustomPresetControlId', () => {
+	test('prefixes the preset id', () => {
+		expect(CreateCustomPresetControlId('abc')).toBe('custom-preset:abc')
+	})
+
+	test('roundtrips through ParseControlId', () => {
+		expect(ParseControlId(CreateCustomPresetControlId('my-preset'))).toEqual({
+			type: 'custom-preset',
+			presetId: 'my-preset',
+		})
+	})
+
+	test('is not mistaken for a module preset control id', () => {
+		expect(ParseControlId('custom-preset:conn1:btn_01:abc')?.type).toBe('custom-preset')
 	})
 })
 

@@ -4,6 +4,7 @@ import type { ExpressionVariableModel } from '@companion-app/shared/Model/Expres
 import type { TriggerModel } from '@companion-app/shared/Model/TriggerModel.js'
 import LogController from '../Log/Controller.js'
 import type { ControlDependencies } from './ControlDependencies.js'
+import { ControlButtonCustomPresetReference } from './ControlTypes/Button/CustomPresetReference.js'
 import { ControlButtonLayered } from './ControlTypes/Button/Layered.js'
 import { ControlButtonPreset } from './ControlTypes/Button/Preset.js'
 import { ControlButtonPresetReference } from './ControlTypes/Button/PresetReference.js'
@@ -52,6 +53,8 @@ export class ControlsFactory {
 				return new ControlButtonLayered(this.#controlDeps, controlId, controlObj2, isImport)
 			} else if (controlObj2?.type === 'preset-reference') {
 				return new ControlButtonPresetReference(this.#controlDeps, controlId, controlObj2, isImport)
+			} else if (controlObj2?.type === 'custom-preset-reference') {
+				return new ControlButtonCustomPresetReference(this.#controlDeps, controlId, controlObj2, isImport)
 			} else if (controlObj2?.type === 'button-reference' || (controlType === 'button-reference' && !controlObj2)) {
 				return new ControlButtonReference(this.#controlDeps, controlId, controlObj2, isImport)
 			} else if (controlObj2?.type === 'pagenum' || (controlType === 'pagenum' && !controlObj2)) {

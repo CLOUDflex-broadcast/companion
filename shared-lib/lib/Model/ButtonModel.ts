@@ -10,6 +10,7 @@ export type SomeButtonModel =
 	| PageDownButtonModel
 	| LayeredButtonModel
 	| PresetReferenceButtonModel
+	| CustomPresetReferenceButtonModel
 	| ButtonReferenceButtonModel
 
 export interface PageNumberButtonModel {
@@ -93,6 +94,37 @@ export interface PresetReferenceButtonModel extends ButtonModelBase {
 	 * Content-based checksum of the source preset this cache was resolved from, produced atomically with the
 	 * model so the two cannot drift. Used to skip rebuilding on a `updatePresets` that didn't actually change
 	 * the preset. Optional: absent on older/imported data (treated as "unknown" → rebuild once).
+	 */
+	checksum?: string
+}
+
+/**
+ * A button that is linked to a user-defined custom preset.
+ * Like a {@link PresetReferenceButtonModel} it keeps a cached copy of the resolved button data, refreshed whenever
+ * the custom preset is edited. Everything is taken from the preset, except the values of its simple (user value)
+ * local variables, which can be overridden per button.
+ */
+export interface CustomPresetReferenceButtonModel extends ButtonModelBase {
+	readonly type: 'custom-preset-reference'
+
+	options: LayeredButtonOptions
+
+	style: {
+		layers: SomeButtonGraphicsElement[]
+	}
+
+	customPresetRef: {
+		presetId: string
+		/**
+		 * The per-button overrides of the preset's local variables, keyed by `localVariable.variableName`.
+		 * A variable without an entry here uses the startup value defined in the preset.
+		 */
+		variableValues: VariableValues
+	}
+
+	/**
+	 * Content-based checksum of the custom preset this cache was resolved from. Used to skip rebuilding when the
+	 * preset reports a change that doesn't affect the resolved data.
 	 */
 	checksum?: string
 }

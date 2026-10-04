@@ -57,6 +57,7 @@ export function useButtonContextMenu({
 	const hotPressMutation = useMutationExt(trpc.controls.hotPressControl.mutationOptions())
 	const hotAbortMutation = useMutationExt(trpc.controls.hotAbortControl.mutationOptions())
 	const createReferenceControlMutation = useMutationExt(trpc.controls.createReferenceControl.mutationOptions())
+	const createCustomPresetMutation = useMutationExt(trpc.controls.customPresets.create.mutationOptions())
 
 	const contextMenuItems = useMemo((): MenuItemProps[] => {
 		if (!contextMenuLocation) return []
@@ -151,6 +152,19 @@ export function useButtonContextMenu({
 		items.push(
 			{ isSeparator: true },
 			{
+				label: 'Save as custom preset',
+				disabled: isEmpty || isMultiple,
+				do: () => {
+					createCustomPresetMutation
+						.mutateAsync({ name: `Button ${formatLocation(location)}`, fromLocation: location })
+						.then((presetId) => {
+							if (!presetId) console.error('This button cannot be saved as a custom preset')
+						})
+						.catch((e) => console.error(`Save as custom preset failed: ${e}`))
+				},
+			},
+			{ isSeparator: true },
+			{
 				label: forCount('Clear'),
 				disabled: isEmpty && !isMultiple,
 				do: () => actions.clearButtons(targets),
@@ -168,6 +182,7 @@ export function useButtonContextMenu({
 		hotPressMutation,
 		hotAbortMutation,
 		createReferenceControlMutation,
+		createCustomPresetMutation,
 		setTabResetToken,
 	])
 

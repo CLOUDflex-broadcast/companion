@@ -11,7 +11,7 @@ import {
 	ParseControlId,
 	type ParsedControlIdType,
 } from '@companion-app/shared/ControlId.js'
-import type { SomeButtonModel } from '@companion-app/shared/Model/ButtonModel.js'
+import type { LayeredButtonModel, SomeButtonModel } from '@companion-app/shared/Model/ButtonModel.js'
 import type { ControlLocation } from '@companion-app/shared/Model/Common.js'
 import type { UIControlUpdate } from '@companion-app/shared/Model/Controls.js'
 import type {
@@ -38,6 +38,7 @@ import { createActionSetsTrpcRouter } from './ActionSetsTrpcRouter.js'
 import type { ControlChangeEvents, ControlCommonEvents, ControlExternalDependencies } from './ControlDependencies.js'
 import type { ControlStore } from './ControlStore.js'
 import { createControlsTrpcRouter } from './ControlsTrpcRouter.js'
+import { ControlButtonCustomPresetReference } from './ControlTypes/Button/CustomPresetReference.js'
 import { ControlButtonLayered } from './ControlTypes/Button/Layered.js'
 import type { ControlButtonPreset } from './ControlTypes/Button/Preset.js'
 import { ControlButtonPresetReference } from './ControlTypes/Button/PresetReference.js'
@@ -47,6 +48,8 @@ import { ControlButtonPageDown } from './ControlTypes/PageDown.js'
 import { ControlButtonPageNumber } from './ControlTypes/PageNumber.js'
 import { ControlButtonPageUp } from './ControlTypes/PageUp.js'
 import { ControlTrigger } from './ControlTypes/Triggers/Trigger.js'
+import { CustomPresetLibrary } from './CustomPresetLibrary.js'
+import { createCustomPresetsTrpcRouter } from './CustomPresetsTrpcRouter.js'
 import type { ControlEntityInstance } from './Entities/EntityInstance.js'
 import type { NewFeedbackValue } from './Entities/Types.js'
 import { createEntitiesTrpcRouter } from './EntitiesTrpcRouter.js'
@@ -104,6 +107,11 @@ export class ControlsController {
 
 	readonly #expressionVariableNamesMap: ExpressionVariableNameMap
 
+	/**
+	 * The user-defined custom presets
+	 */
+	readonly #customPresets: CustomPresetLibrary
+
 	readonly #controlChangeEvents = new EventEmitter<ControlChangeEvents>()
 
 	/** Resolve a page's local-variable entities (its `page:<pageId>` control), for `$(page:x)` injection. */
@@ -125,6 +133,12 @@ export class ControlsController {
 
 		this.#expressionVariableNamesMap = new ExpressionVariableNameMap(this.#deps.variableValues, this.#store.controls)
 
+		this.#customPresets = new CustomPresetLibrary(db, controlEvents, {
+			getControl: (controlId) => this.#store.getControl(controlId),
+			createTemplateControl: (controlId, model) => this.#createCustomPresetTemplateControl(controlId, model),
+			deleteControl: (controlId) => this.deleteControl(controlId),
+		})
+
 		this.#factory = new ControlsFactory({
 			...this.#deps,
 			dbTable: this.#store.dbTable,
@@ -134,6 +148,7 @@ export class ControlsController {
 			triggerEvents: this.#store.triggerEvents,
 			expressionVariableNamesMap: this.#expressionVariableNamesMap,
 			controlsAccessor: this.#store,
+			customPresets: this.#customPresets,
 		})
 
 		this.#triggerCollections = new TriggerCollections(
@@ -248,6 +263,13 @@ export class ControlsController {
 			actionSets: createActionSetsTrpcRouter(this.#store.controls),
 			steps: createStepsTrpcRouter(this.#store.controls),
 			styles: createStylesTrpcRouter(this.#store.controls),
+			customPresets: createCustomPresetsTrpcRouter(
+				this.#customPresets,
+				this.#store.controls,
+				this.#deps.pageStore,
+				this.#controlEvents,
+				this
+			),
 
 			...createControlsTrpcRouter(
 				this.#logger,
@@ -290,6 +312,7 @@ export class ControlsController {
 	getAllButtons(): Array<
 		| ControlButtonLayered
 		| ControlButtonPresetReference
+		| ControlButtonCustomPresetReference
 		| ControlButtonPageDown
 		| ControlButtonPageNumber
 		| ControlButtonPageUp
@@ -297,14 +320,19 @@ export class ControlsController {
 		const buttons: Array<
 			| ControlButtonLayered
 			| ControlButtonPresetReference
+			| ControlButtonCustomPresetReference
 			| ControlButtonPageDown
 			| ControlButtonPageNumber
 			| ControlButtonPageUp
 		> = []
 		for (const control of this.#store.controls.values()) {
+			// The templates of custom presets are not placed buttons
+			if (ParseControlId(control.controlId)?.type === 'custom-preset') continue
+
 			if (
 				control instanceof ControlButtonLayered ||
 				control instanceof ControlButtonPresetReference ||
+				control instanceof ControlButtonCustomPresetReference ||
 				control instanceof ControlButtonPageDown ||
 				control instanceof ControlButtonPageNumber ||
 				control instanceof ControlButtonPageUp
@@ -480,6 +508,36 @@ export class ControlsController {
 
 		// Initialize expression variable names map
 		this.#expressionVariableNamesMap.rebuildMap()
+
+		// Ensure every custom preset has its template control
+		this.#customPresets.init(this.#store.controls.keys())
+	}
+
+	/**
+	 * Create the off-grid template control of a custom preset
+	 * @param controlId Id of the template control
+	 * @param model The button data to start from, or null for a default button
+	 */
+	#createCustomPresetTemplateControl(controlId: string, model: LayeredButtonModel | null): ControlButtonLayered | null {
+		if (this.#store.controls.has(controlId)) throw new Error(`Control ${controlId} already exists`)
+
+		const newControl = this.#factory.createClassForControl(
+			controlId,
+			'button',
+			model ? structuredClone(model) : 'button-layered',
+			!!model
+		)
+		if (!(newControl instanceof ControlButtonLayered)) {
+			newControl?.destroy()
+			return null
+		}
+
+		this.#store.controls.set(controlId, newControl)
+
+		// Ensure it is stored to the db
+		newControl.commitChange(true)
+
+		return newControl
 	}
 
 	/**

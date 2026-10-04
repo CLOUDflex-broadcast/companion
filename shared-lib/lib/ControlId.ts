@@ -83,6 +83,13 @@ export function CreatePresetControlId(connectionId: string, presetId: string, va
 	return `preset:${connectionId}:${presetId}:${variablesHash}`
 }
 
+/**
+ * Create the control id for the (off-grid) template button of a user-defined custom preset
+ */
+export function CreateCustomPresetControlId(presetId: string): string {
+	return `custom-preset:${presetId}`
+}
+
 export interface ParsedControlIdBank {
 	type: 'bank'
 	control: string
@@ -105,12 +112,17 @@ export interface ParsedControlIdPreset {
 	presetId: string
 	variablesHash: string
 }
+export interface ParsedControlIdCustomPreset {
+	type: 'custom-preset'
+	presetId: string
+}
 export type ParsedControlIdType =
 	| ParsedControlIdBank
 	| ParsedControlIdTrigger
 	| ParsedControlIdExpressionVariable
 	| ParsedControlIdPage
 	| ParsedControlIdPreset
+	| ParsedControlIdCustomPreset
 
 /**
  * Parse a controlId
@@ -146,6 +158,14 @@ export function ParseControlId(controlId: string): ParsedControlIdType | undefin
 			return {
 				type: 'page',
 				pageId: matchPage[1],
+			}
+		}
+
+		const matchCustomPreset = controlId.match(/^custom-preset:(.*)$/)
+		if (matchCustomPreset) {
+			return {
+				type: 'custom-preset',
+				presetId: matchCustomPreset[1],
 			}
 		}
 
