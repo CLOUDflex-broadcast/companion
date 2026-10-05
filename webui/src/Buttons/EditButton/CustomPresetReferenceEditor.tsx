@@ -61,15 +61,18 @@ export function CustomPresetReferenceEditor({ config, location }: CustomPresetRe
 						These values can be changed for this button. Everything else is managed by the preset.
 					</p>
 					<Form row className="gap-2" onSubmit={PreventDefaultHandler}>
-						{editableVariables.map(({ variableName, defaultValue }) => (
-							<CustomPresetReferenceVariableRow
-								key={variableName}
-								location={location}
-								variableName={variableName}
-								value={defaultValue}
-								isOverridden={Object.hasOwn(variableValues, variableName)}
-							/>
-						))}
+						{editableVariables.map(({ variableName, defaultValue }) => {
+							const isOverridden = Object.hasOwn(variableValues, variableName)
+							return (
+								<CustomPresetReferenceVariableRow
+									key={variableName}
+									location={location}
+									variableName={variableName}
+									value={isOverridden ? variableValues[variableName] : defaultValue}
+									isOverridden={isOverridden}
+								/>
+							)
+						})}
 					</Form>
 				</>
 			) : (

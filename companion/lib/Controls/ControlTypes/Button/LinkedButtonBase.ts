@@ -138,8 +138,11 @@ export abstract class LinkedButtonControlBase<TJson extends LinkedButtonModelBas
 		this.drawing.loadElements(updatedModel.style.layers)
 		// `notes` is user-owned metadata, not part of the source - preserve it across refreshes
 		const userNotes = this.options.notes
-		this.options = Object.assign(this.options, updatedModel.options || {})
-		this.options.notes = userNotes
+		this.options = {
+			...structuredClone(ButtonControlRuntimeBase.DefaultOptions),
+			...updatedModel.options,
+			notes: userNotes,
+		}
 		this.entities.setupRotaryActionSets(!!this.options.rotaryActions, true)
 		// Load as a clone, to generate new entity ids.
 		this.entities.loadStorage(updatedModel, false, true)

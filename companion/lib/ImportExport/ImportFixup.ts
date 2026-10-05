@@ -200,7 +200,7 @@ export function fixupCustomPresetReferenceControl(
 	const result: CustomPresetReferenceButtonModel = {
 		type: 'custom-preset-reference',
 		options: structuredClone(control.options),
-		style: structuredClone(control.style),
+		style: { layers: structuredClone(control.style?.layers ?? []) },
 		...fixupButtonControlBase(logger, control, referencesUpdater, instanceIdMap),
 		customPresetRef: {
 			presetId: String(control.customPresetRef?.presetId ?? ''),
